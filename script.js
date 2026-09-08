@@ -1,70 +1,62 @@
-import { GoogleGenAI } from "@google/genai";
+const API_URL = "https://become.keshavsamone.workers.dev/api/chat";
 
-function corsHeaders() {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
-  };
-}
+async function askAI() {
+  const question = document.getElementById("question").value.trim();
+  const answer = document.getElementById("answer");
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      ...corsHeaders()
-    }
-  });
-}
-
-export default {
-  async fetch(request, env) {
-
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        status: 204,
-        headers: corsHeaders()
-      });
-    }
-
-    if (request.method !== "POST") {
-      return new Response("Become AI is running.", {
-        headers: corsHeaders()
-      });
-    }
-
-    try {
-      const body = await request.json();
-      const message = body.message;
-
-      if (!message) {
-        return json({ error: "Please enter a message." }, 400);
-      }
-
-      if (!env.GEMINI_API_KEY) {
-        return json({ error: "GEMINI_API_KEY is not configured." }, 500);
-      }
-
-      const ai = new GoogleGenAI({
-        apiKey: env.GEMINI_API_KEY
-      });
-
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: message
-      });
-
-      return json({
-        answer: response.text
-      });
-
-    } catch (error) {
-      console.error(error);
-
-      return json({
-        error: "AI error: " + error.message
-      }, 500);
-    }
+  if (!question) {
+    alert("Ask me something first.");
+    return;
   }
-};
+
+  answer.style.display = "block";
+  answer.innerHTML = "🧠 Become AI is thinking...";
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: question
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+      answer.innerHTML = "⚠️ " + (data.error || "Something went wrong.");
+      return;
+    }
+
+    answer.innerHTML = `
+      <strong>Become AI</strong>
+      <br><br>
+      ${formatAnswer(data.answer)}
+    `;
+
+  } catch (error) {
+    console.error(error);
+    answer.innerHTML = "⚠️ Could not connect to Become AI.";
+  }
+}
+
+function formatAnswer(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>");
+}
+
+function research() {
+  const question = document.getElementById("question").value.trim();
+
+  if (!question) {
+    alert("Enter a question to research.");
+    return;
+  }
+
+  alert("Research mode is coming next.");
+}
