@@ -1,4 +1,6 @@
-function askAI() {
+const API_URL = "https://become.keshavsamone.workers.dev";
+
+async function askAI() {
   const question = document.getElementById("question").value.trim();
   const answer = document.getElementById("answer");
 
@@ -8,18 +10,45 @@ function askAI() {
   }
 
   answer.style.display = "block";
+  answer.innerHTML = "🧠 Become AI is thinking...";
 
-  answer.innerHTML = `
-    <strong>Become AI</strong>
-    <br><br>
-    I received your question:
-    <br><br>
-    "${question}"
-    <br><br>
-    <span style="color:#8b5cf6">
-      AI engine coming next...
-    </span>
-  `;
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: question
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      answer.innerHTML = "⚠️ " + data.error;
+      return;
+    }
+
+    answer.innerHTML = `
+      <strong>Become AI</strong>
+      <br><br>
+      ${formatAnswer(data.answer)}
+    `;
+
+  } catch (error) {
+    console.error(error);
+    answer.innerHTML =
+      "⚠️ Could not connect to Become AI.";
+  }
+}
+
+function formatAnswer(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>");
 }
 
 function research() {
@@ -30,19 +59,5 @@ function research() {
     return;
   }
 
-  const answer = document.getElementById("answer");
-
-  answer.style.display = "block";
-
-  answer.innerHTML = `
-    <strong>🔎 Research Mode</strong>
-    <br><br>
-    Become AI will research:
-    <br><br>
-    "${question}"
-    <br><br>
-    <span style="color:#8b5cf6">
-      Research engine coming next...
-    </span>
-  `;
+  alert("Research mode is coming next.");
 }
