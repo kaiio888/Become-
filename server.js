@@ -1,44 +1,73 @@
-const express = require("express");
-const cors = require("cors");
-const { GoogleGenAI } = require("@google/genai");
+import { GoogleGenAI } from "@google/genai";
 
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY
-});
-
-app.post("/api/chat", async (req, res) => {
-  try {
-    const { message } = req.body;
-
-    if (!message) {
-      return res.status(400).json({
-        error: "Please enter a message."
+export default {
+  async fetch(request, env) {
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type"
+        }
       });
     }
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.7-flash",
-      contents: message
-    });
+    if (request.method !== "POST") {
+      return new Response("Become AI is running.");
+    }
 
-    res.json({
-      answer: response.text
-    });
+    try {
+      const { message } = await request.json();
 
-  } catch (error) {
-    console.error(error);
+      if (!message) {
+        return new Response(
+          JSON.stringify({ error: "Please enter a message." }),
+          {
+            status: 400,
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*"
+            }
+          }
+        );
+      }
 
-    res.status(500).json({
-      error: "Become AI could not connect to the AI."
-    });
+      const ai = new GoogleGenAI({
+        apiKey: env.GEMINI_API_KEY
+      });
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: message
+      });
+
+      return new Response(
+        JSON.stringify({
+          answer: response.text
+        }),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          }
+        }
+      );
+
+    } catch (error) {
+      console.error(error);
+
+      return new Response(
+        JSON.stringify({
+          error: "Become AI could not connect to the AI."
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          }
+        }
+      );
+    }
   }
-});
-
-app.listen(3000, () => {
-  console.log("Become AI server is running");
-});
+};
