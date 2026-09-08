@@ -1,9 +1,7 @@
-import { GoogleGenAI } from "@google/genai";
-
 export default {
   async fetch(request, env) {
 
-    // Allow your website to talk to the Worker
+    // CORS
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
@@ -15,7 +13,7 @@ export default {
       });
     }
 
-    // Test the Worker in a browser
+    // Test the Worker
     if (request.method === "GET") {
       return new Response("Become AI is running.", {
         headers: {
@@ -25,7 +23,9 @@ export default {
     }
 
     if (request.method !== "POST") {
-      return new Response("Method not allowed.", { status: 405 });
+      return new Response("Method not allowed.", {
+        status: 405
+      });
     }
 
     try {
@@ -57,19 +57,51 @@ export default {
         );
       }
 
-      const ai = new GoogleGenAI({
-        apiKey: env.GEMINI_API_KEY
-      });
+      const geminiResponse = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": env.GEMINI_API_KEY
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: message
+                  }
+                ]
+              }
+            ]
+          })
+        }
+      );
 
-      const result = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: message
-      });
+      const data = await geminiResponse.json();
+
+      if (!geminiResponse.ok) {
+        return new Response(
+          JSON.stringify({
+            error: data.error?.message || "Gemini request failed."
+          }),
+          {
+            status: geminiResponse.status,
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*"
+            }
+          }
+        );
+      }
+
+      const answer =
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "Gemini returned no answer.";
 
       return new Response(
-        JSON.stringify({
-          answer: result.text
-        }),
+        JSON.stringify({ answer }),
         {
           status: 200,
           headers: {
@@ -80,8 +112,6 @@ export default {
       );
 
     } catch (error) {
-      console.error(error);
-
       return new Response(
         JSON.stringify({
           error: error.message || "AI request failed."
