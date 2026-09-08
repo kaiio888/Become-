@@ -1,26 +1,44 @@
 const express = require("express");
 const cors = require("cors");
+const { GoogleGenAI } = require("@google/genai");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.post("/api/chat", async (req, res) => {
-  const { message } = req.body;
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY
+});
 
-  if (!message) {
-    return res.status(400).json({
-      error: "No message provided"
+app.post("/api/chat", async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    if (!message) {
+      return res.status(400).json({
+        error: "Please enter a message."
+      });
+    }
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.7-flash",
+      contents: message
+    });
+
+    res.json({
+      answer: response.text
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Become AI could not connect to the AI."
     });
   }
-
-  // AI connection will go here
-  res.json({
-    answer: "Become AI received: " + message
-  });
 });
 
 app.listen(3000, () => {
-  console.log("Become AI server running on port 3000");
+  console.log("Become AI server is running");
 });
