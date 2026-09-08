@@ -2,8 +2,11 @@ import { GoogleGenAI } from "@google/genai";
 
 export default {
   async fetch(request, env) {
+
+    // Allow your website to talk to the Worker
     if (request.method === "OPTIONS") {
       return new Response(null, {
+        status: 204,
         headers: {
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -12,8 +15,17 @@ export default {
       });
     }
 
+    // Test the Worker in a browser
+    if (request.method === "GET") {
+      return new Response("Become AI is running.", {
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        }
+      });
+    }
+
     if (request.method !== "POST") {
-      return new Response("Become AI is running.");
+      return new Response("Method not allowed.", { status: 405 });
     }
 
     try {
@@ -32,20 +44,34 @@ export default {
         );
       }
 
+      if (!env.GEMINI_API_KEY) {
+        return new Response(
+          JSON.stringify({ error: "Gemini API key is missing." }),
+          {
+            status: 500,
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*"
+            }
+          }
+        );
+      }
+
       const ai = new GoogleGenAI({
         apiKey: env.GEMINI_API_KEY
       });
 
-      const response = await ai.models.generateContent({
+      const result = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: message
       });
 
       return new Response(
         JSON.stringify({
-          answer: response.text
+          answer: result.text
         }),
         {
+          status: 200,
           headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*"
@@ -58,7 +84,7 @@ export default {
 
       return new Response(
         JSON.stringify({
-          error: "Become AI could not connect to the AI."
+          error: error.message || "AI request failed."
         }),
         {
           status: 500,
