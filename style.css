@@ -1,0 +1,147 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #050505;
+  color: white;
+  min-height: 100vh;
+}
+
+header {
+  height: 75px;
+  padding: 0 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #202020;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.logo span {
+  color: #8b5cf6;
+}
+
+.research-btn {
+  background: #111;
+  border: 1px solid #333;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+main {
+  min-height: calc(100vh - 130px);
+  display: flex;
+  justify-content: center;
+  padding: 90px 20px;
+}
+
+.hero {
+  width: 100%;
+  max-width: 850px;
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 1px solid #292929;
+  background: #101010;
+  border-radius: 30px;
+  color: #aaa;
+  font-size: 13px;
+  margin-bottom: 28px;
+}
+
+h1 {
+  font-size: clamp(45px, 8vw, 82px);
+  line-height: 1;
+  letter-spacing: -4px;
+}
+
+h1 span {
+  color: #8b5cf6;
+}
+
+.hero > p {
+  color: #888;
+  font-size: 17px;
+  margin: 25px 0 40px;
+}
+
+.chat-box {
+  background: #101010;
+  border: 1px solid #292929;
+  border-radius: 18px;
+  padding: 18px;
+  text-align: left;
+  box-shadow: 0 20px 70px rgba(0,0,0,.4);
+}
+
+textarea {
+  width: 100%;
+  height: 90px;
+  resize: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 17px;
+  font-family: inherit;
+}
+
+textarea::placeholder {
+  color: #666;
+}
+
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #666;
+  font-size: 13px;
+}
+
+.bottom button {
+  width: 43px;
+  height: 43px;
+  border: none;
+  border-radius: 12px;
+  background: #8b5cf6;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.bottom button:hover {
+  transform: scale(1.05);
+}
+
+#answer {
+  display: none;
+  margin-top: 25px;
+  padding: 25px;
+  background: #0d0d0d;
+  border: 1px solid #292929;
+  border-radius: 15px;
+  text-align: left;
+  line-height: 1.6;
+  color: #ddd;
+}
+
+footer {
+  text-align: center;
+  color: #555;
+  padding: 20px;
+  border-top: 1px solid #202020;
+}
