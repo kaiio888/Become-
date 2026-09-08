@@ -1,4 +1,4 @@
-const API_URL = "https://become.keshavsamone.workers.dev";
+const API_URL = "https://become.keshavsamone.workers.dev/api/chat";
 
 async function askAI() {
   const question = document.getElementById("question").value.trim();
@@ -25,8 +25,8 @@ async function askAI() {
 
     const data = await response.json();
 
-    if (data.error) {
-      answer.innerHTML = "⚠️ " + data.error;
+    if (!response.ok || data.error) {
+      answer.innerHTML = "⚠️ " + (data.error || "Something went wrong.");
       return;
     }
 
@@ -38,13 +38,12 @@ async function askAI() {
 
   } catch (error) {
     console.error(error);
-    answer.innerHTML =
-      "⚠️ Could not connect to Become AI.";
+    answer.innerHTML = "⚠️ Could not connect to Become AI.";
   }
 }
 
 function formatAnswer(text) {
-  return text
+  return String(text)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
